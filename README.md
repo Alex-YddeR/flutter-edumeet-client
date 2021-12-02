@@ -1,16 +1,16 @@
 # flutter_edumeet
 
 A flutter client for Edumeet.
+We are using Mediasoup for media processing and socket.io for signaling
 
-## Getting Started
+## How to test
+Using [Edumeet demo] (https://letsmeet.no) as a video conference server
 
-This project is a starting point for a Flutter application.
+## Processing
+- [x] Intergrate socket IO and connect, send, receive messsages
+- [x] Join room and receive notification from letsmeet.no
+- [ ] Connect video and audio
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Preference
+- [mediasoup_client_flutter] (https://pub.dev/packages/mediasoup_client_flutter)
+- [socket_io_client] (https://pub.dev/packages/socket_io_client)
