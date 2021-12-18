@@ -3,9 +3,11 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_edumeet/components/edumeet_appbar.dart';
+import 'package:flutter_edumeet/features/me/bloc/me_bloc.dart';
 import 'package:flutter_edumeet/features/peers/bloc/peers_bloc.dart';
 import 'package:flutter_edumeet/features/peers/enitity/peer.dart';
 import 'package:flutter_edumeet/features/peers/ui/list_remote_streams.dart';
+import 'package:flutter_edumeet/features/peers/ui/share_screen_view.dart';
 import 'package:flutter_edumeet/features/producers/ui/controls/base_controls_widget.dart';
 import 'package:flutter_edumeet/features/producers/ui/renderer/local_stream.dart';
 import 'package:flutter_edumeet/features/room/bloc/room_bloc.dart';
@@ -88,18 +90,22 @@ class _RoomMeetingState extends State<RoomMeeting> {
       body: SafeArea(
         child: GestureDetector(
           onTap: toggle,
-          // child: Stack(
-          //   fit: StackFit.expand,
-          //   children: [
-          //     ListRemoteStreams(),
-          //     LocalStream(),
-          //   ],
-          // ),
-          child: Column(
-            children: [
-              Expanded(child: ListRemoteStreams()),
-              LocalStream(localUserName: widget.roomModelArguments.name),
-            ],
+          child: BlocBuilder<PeersBloc, PeersState>(
+            buildWhen: (previous, current) =>
+                previous.shareScreenPeer.length !=
+                current.shareScreenPeer.length,
+            builder: (context, state) {
+              log("presenter: REBUILD AFTER CHANGE PRESENTER MODE! - ${state.shareScreenPeer.length} - ${BlocProvider.of<MeBloc>(context).state.presenterConsumerIds.length}");
+              if (state.shareScreenPeer.length > 0) {
+                return ShareScreenView();
+              }
+              return Column(
+                children: [
+                  Expanded(child: ListRemoteStreams()),
+                  LocalStream(localUserName: widget.roomModelArguments.name),
+                ],
+              );
+            },
           ),
         ),
       ),

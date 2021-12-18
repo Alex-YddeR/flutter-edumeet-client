@@ -101,7 +101,7 @@ class SocketIO {
   /// use for send message to other peer
   sendEventEmitter(method, data) async {
     log('sendEventEmitter() [method: $method, data: $data]');
-    _socket.emit('notification', {
+    _socket.emit('request', {
       'method': method,
       'data': data,
     });

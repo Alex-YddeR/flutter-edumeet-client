@@ -15,6 +15,7 @@ class MeBloc extends Bloc<MeEvent, MeState> {
           shareInProgress: false,
           id: randomAlpha(8),
           displayName: roomModel.name,
+          presenterConsumerIds: [],
         ));
 
   @override
@@ -24,10 +25,32 @@ class MeBloc extends Bloc<MeEvent, MeState> {
     if (event is MeSetWebcamInProgress) {
       yield* _mapMeSetWebCamInProgressToState(event);
     }
+    if (event is MePresenterModeAddConsumer) {
+      yield* _mapMePresenterAddConsumerToState(event);
+    }
+    if (event is MePresenterModeRemoveConsumer) {
+      yield* _mapMePresenterRemoveConsumerToState(event);
+    }
   }
 
   Stream<MeState> _mapMeSetWebCamInProgressToState(
       MeSetWebcamInProgress event) async* {
     yield MeState.copy(state, webcamInProgress: event.progress);
+  }
+
+  Stream<MeState> _mapMePresenterAddConsumerToState(
+      MePresenterModeAddConsumer event) async* {
+    final List<String> presenterConsumerIds = state.presenterConsumerIds;
+    presenterConsumerIds.add(event.presenterConsumnerId);
+
+    yield MeState.copy(state, presenterConsumerId: presenterConsumerIds);
+  }
+
+  Stream<MeState> _mapMePresenterRemoveConsumerToState(
+      MePresenterModeRemoveConsumer event) async* {
+    final List<String> presenterConsumerIds = state.presenterConsumerIds;
+    presenterConsumerIds.remove(event.presenterConsumnerId);
+
+    yield MeState.copy(state, presenterConsumerId: presenterConsumerIds);
   }
 }

@@ -1,7 +1,7 @@
 # flutter_edumeet
 
 A flutter client for Edumeet.
-We are using Mediasoup for media processing and socket.io for signaling
+We are using Mediasoup for media processing and socket.io
 
 ## How to test
 Using [Edumeet demo] (https://letsmeet.no) as a video conference server

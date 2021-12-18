@@ -28,9 +28,9 @@ dependencies:
   expandable_bottom_sheet: ^1.1.1+1
   flutter_bloc: ^7.0.1
   fluttertoast: ^8.0.8
-  flutter_webrtc: ^0.6.7
+  flutter_webrtc: ^0.8.0
   logging: ^1.0.1
-  mediasoup_client_flutter: ^0.4.6
+  mediasoup_client_flutter: ^0.8.1
   random_words: ^1.0.2
   random_string: ^2.3.1
   socket_io_client: ^1.0.1

@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter_edumeet/features/me/bloc/me_bloc.dart';
 import 'package:flutter_edumeet/features/media_devices/bloc/media_devices_bloc.dart';
 import 'package:flutter_edumeet/features/peers/bloc/peers_bloc.dart';
+import 'package:flutter_edumeet/features/peers/enitity/peer.dart';
 import 'package:flutter_edumeet/features/producers/bloc/producers_bloc.dart';
 import 'package:flutter_edumeet/features/room/bloc/room_bloc.dart';
 import 'package:flutter/foundation.dart';
@@ -229,13 +230,30 @@ class RoomClientRepository {
     // consumer.on('transportclose', () {
     //   // consumersBloc.add(ConsumerRemove(consumerId: consumer.id));
     // });
+    String peerId = consumer.peerId!;
 
-    ScalabilityMode scalabilityMode = ScalabilityMode.parse(
-        consumer.rtpParameters.encodings.first.scalabilityMode);
+    // ScalabilityMode scalabilityMode = ScalabilityMode.parse(
+    //     consumer.rtpParameters.encodings.first.scalabilityMode);
 
-    accept({});
+    try {
+      consumer.resume();
+      _socketIo!.sendEventEmitter('resumeConsumer', {
+        'consumerId': consumer.id,
+      });
 
-    peersBloc.add(PeerAddConsumer(peerId: consumer.peerId, consumer: consumer));
+      final bool check = consumer.appData['source'].toString() == "screen";
+      log("map presenter to state: check $check");
+      if (consumer.appData['source'].toString() == "screen") {
+        peersBloc.add(
+            PeerAddConsumerShareScreen(peerId: peerId, consumer: consumer));
+        meBloc
+            .add(MePresenterModeAddConsumer(presenterConsumnerId: consumer.id));
+      } else {
+        peersBloc.add(PeerAddConsumer(peerId: peerId, consumer: consumer));
+      }
+    } catch (error) {
+      print(error);
+    }
   }
 
   /// Create a new mediasoup Device.
@@ -500,21 +518,65 @@ class RoomClientRepository {
           }
         case 'newConsumer':
           log('rcv newConsumer ${notification['data']}');
-          _recvTransport!.consume(
-            id: notification['data']['id'],
-            producerId: notification['data']['producerId'],
-            kind: RTCRtpMediaTypeExtension.fromString(
-                notification['data']['kind']),
-            rtpParameters:
-                RtpParameters.fromMap(notification['data']['rtpParameters']),
-            appData: Map<String, dynamic>.from(notification['data']['appData']),
-            peerId: notification['data']['peerId'],
-          );
+          final bool check =
+              notification['data']['appData']['source'].toString() == "screen";
+          log("map presenter to state on newConsumer: check $check");
+          if (check) {
+            final Map<String, Peer> peers = peersBloc.state.peers;
+            final Peer? currentPeer = peers[notification['data']['peerId']];
+
+            peersBloc.add(PeerAddShareScreen(newPeer: {
+              'id': notification['data']['peerId'],
+              'displayName': currentPeer!.displayName + " Share Screen",
+              'raisedHand': false,
+            }));
+
+            _recvTransport!.consume(
+              id: notification['data']['id'],
+              producerId: notification['data']['producerId'],
+              kind: RTCRtpMediaTypeExtension.fromString(
+                  notification['data']['kind']),
+              rtpParameters:
+                  RtpParameters.fromMap(notification['data']['rtpParameters']),
+              appData:
+                  Map<String, dynamic>.from(notification['data']['appData']),
+              peerId: notification['data']['peerId'],
+            );
+          } else {
+            _recvTransport!.consume(
+              id: notification['data']['id'],
+              producerId: notification['data']['producerId'],
+              kind: RTCRtpMediaTypeExtension.fromString(
+                  notification['data']['kind']),
+              rtpParameters:
+                  RtpParameters.fromMap(notification['data']['rtpParameters']),
+              appData:
+                  Map<String, dynamic>.from(notification['data']['appData']),
+              peerId: notification['data']['peerId'],
+            );
+          }
           break;
         case 'consumerClosed':
           {
             String consumerId = notification['data']['consumerId'];
-            peersBloc.add(PeerRemoveConsumer(consumerId: consumerId));
+            final Map<String, Peer> shareScreenPeer =
+                peersBloc.state.shareScreenPeer;
+            final List<String> presenterConsumerIds =
+                meBloc.state.presenterConsumerIds;
+            final bool check = presenterConsumerIds.contains(consumerId);
+            if (check) {
+              peersBloc
+                  .add(PeerRemoveConsumerShareScreen(consumerId: consumerId));
+
+              final Peer? peer = shareScreenPeer.values.firstWhere(
+                  (element) => element.consumers.contains(consumerId));
+
+              peersBloc.add(PeerRemoveShareScreen(peerId: peer!.id));
+              meBloc.add(MePresenterModeRemoveConsumer(
+                  presenterConsumnerId: consumerId));
+            } else {
+              peersBloc.add(PeerRemoveConsumer(consumerId: consumerId));
+            }
 
             break;
           }

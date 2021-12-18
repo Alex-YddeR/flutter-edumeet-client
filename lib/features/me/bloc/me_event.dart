@@ -12,3 +12,21 @@ class MeSetWebcamInProgress extends MeEvent {
   @override
   List<Object> get props => [progress];
 }
+
+class MePresenterModeAddConsumer extends MeEvent {
+  final String presenterConsumnerId;
+
+  const MePresenterModeAddConsumer({required this.presenterConsumnerId});
+
+  @override
+  List<Object> get props => [presenterConsumnerId];
+}
+
+class MePresenterModeRemoveConsumer extends MeEvent {
+  final String presenterConsumnerId;
+
+  const MePresenterModeRemoveConsumer({required this.presenterConsumnerId});
+
+  @override
+  List<Object> get props => [presenterConsumnerId];
+}

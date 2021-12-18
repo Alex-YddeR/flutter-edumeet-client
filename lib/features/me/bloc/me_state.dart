@@ -5,27 +5,35 @@ class MeState extends Equatable {
   final String id;
   final bool shareInProgress;
   final bool webcamInProgress;
+  final List<String> presenterConsumerIds;
 
   const MeState({
     required this.displayName,
     required this.id,
     required this.shareInProgress,
     required this.webcamInProgress,
+    required this.presenterConsumerIds,
   });
 
-  static MeState copy(MeState old, {
+  static MeState copy(
+    MeState old, {
     String? displayName,
     String? id,
     bool? shareInProgress,
     bool? webcamInProgress,
+    bool? presenterMode,
+    List<String>? presenterConsumerId,
   }) {
     return MeState(
       displayName: displayName ?? old.displayName,
       id: id ?? old.id,
-      shareInProgress: shareInProgress != null ? shareInProgress : old.shareInProgress,
-      webcamInProgress: webcamInProgress != null ? webcamInProgress : old.webcamInProgress,
+      shareInProgress:
+          shareInProgress != null ? shareInProgress : old.shareInProgress,
+      webcamInProgress:
+          webcamInProgress != null ? webcamInProgress : old.webcamInProgress,
+      presenterConsumerIds: presenterConsumerId ?? old.presenterConsumerIds,
     );
-}
+  }
 
   @override
   List<Object> get props => [
@@ -33,5 +41,6 @@ class MeState extends Equatable {
         id,
         shareInProgress,
         webcamInProgress,
+        presenterConsumerIds,
       ];
 }
